@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Donate Online</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<style>
+:root{
+    --bg:#f4f6ff;
+    --card:#ffffff;
+    --text:#000;
+}
+.dark{
+    --bg:#0f172a;
+    --card:#1e293b;
+    --text:#fff;
+}
+
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    transition:0.4s;
+}
+
+.container{
+    max-width:460px;
+    background:var(--card);
+    margin:30px auto;
+    padding:20px;
+    border-radius:14px;
+    box-shadow:0 10px 30px rgba(0,0,0,.2);
+    animation:fade 0.8s;
+}
+
+@keyframes fade{
+    from{opacity:0;transform:translateY(20px)}
+    to{opacity:1;transform:translateY(0)}
+}
+
+h1{text-align:center}
+
+input,textarea,button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border-radius:8px;
+    border:none;
+    outline:none;
+}
+
+input,textarea{
+    background:#e5e7eb;
+}
+.dark input,.dark textarea{
+    background:#334155;
+    color:white;
+}
+
+button{
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.nominal button{
+    background:#c7d2fe;
+}
+.nominal button:hover{
+    background:#6366f1;
+    color:white;
+}
+
+.donate{background:#6366f1;color:white}
+.copy{background:#22c55e;color:white}
+.wa{background:#25D366;color:white}
+.toggle{background:#000;color:white}
+
+.list{
+    margin-top:10px;
+}
+.item{
+    background:#e5e7eb;
+    padding:10px;
+    border-radius:8px;
+    margin-top:8px;
+    animation:slide 0.5s;
+}
+.dark .item{background:#334155}
+
+@keyframes slide{
+    from{opacity:0;transform:translateX(-20px)}
+    to{opacity:1;transform:translateX(0)}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>💖 DONATE</h1>
+
+<button class="toggle" onclick="toggleDark()">🌙 Dark Mode</button>
+
+<input id="nama" placeholder="Nama Donatur">
+<textarea id="pesan" placeholder="Pesan Donatur"></textarea>
+
+<div class="nominal">
+<button onclick="setNominal(10000)">Rp10.000</button>
+<button onclick="setNominal(20000)">Rp20.000</button>
+<button onclick="setNominal(50000)">Rp50.000</button>
+</div>
+
+<input type="number" id="nominal" placeholder="Nominal">
+
+<button class="donate" onclick="donate()">Donasi Sekarang</button>
+
+<hr>
+
+<h3>Nomor DANA</h3>
+<input value="+628388647673" readonly>
+
+<button class="copy" onclick="copyDana()">Salin Nomor</button>
+<button class="wa" onclick="chatWA()">Konfirmasi WhatsApp</button>
+
+<hr>
+<h3>💬 Donatur Online</h3>
+<div class="list" id="list"></div>
+</div>
+
+<script>
+/* 🔥 FIREBASE CONFIG (GANTI) */
+const firebaseConfig = {
+  apiKey: "API_KEY_KAMU",
+  authDomain: "PROJECT.firebaseapp.com",
+  databaseURL: "https://PROJECT.firebaseio.com",
+  projectId: "PROJECT",
+  storageBucket: "PROJECT.appspot.com",
+  messagingSenderId: "ID",
+  appId: "APP_ID"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+/* DONATE */
+function donate(){
+    let data={
+        nama:nama.value || "Anonim",
+        pesan:pesan.value || "-",
+        nominal:nominal.value,
+        waktu:new Date().toLocaleString()
+    };
+    if(!data.nominal){alert("Nominal wajib");return;}
+    db.ref("donasi").push(data);
+    alert("Terima kasih ❤️");
+}
+
+db.ref("donasi").limitToLast(20).on("value",snap=>{
+    let html="";
+    snap.forEach(d=>{
+        let x=d.val();
+        html=`
+        <div class="item">
+        <b>${x.nama}</b> - Rp${x.nominal}<br>
+        "${x.pesan}"<br>
+        <small>${x.waktu}</small>
+        </div>`+html;
+    });
+    list.innerHTML=html;
+});
+
+/* UTIL */
+function setNominal(n){nominal.value=n}
+function copyDana(){
+    navigator.clipboard.writeText("+628388647673");
+    alert("Nomor disalin");
+}
+function chatWA(){
+    window.open("https://wa.me/628388647673?text=Halo%20saya%20sudah%20donasi");
+}
+function toggleDark(){
+    document.body.classList.toggle("dark");
+}
+</script>
+
+</body>
+</html>
